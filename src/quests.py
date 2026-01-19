@@ -27,6 +27,7 @@ def filteer_russian_names(names_list: list) -> list:
     for name_item in names_list:
         if is_cirillic(name_item):
             new_names_list.append(name_item)
+    new_names_list.sort()
     return new_names_list
 
 
@@ -36,6 +37,7 @@ def filteer_english_names(names_list: list) -> list:
     for name_item in names_list:
         if not is_cirillic(name_item):
             new_names_list.append(name_item)
+    new_names_list.sort()
     return new_names_list
 
 
