@@ -15,6 +15,7 @@ def name_list(file_names: str) -> list:
                 formatted_names_list.append(new_name)
     return formatted_names_list
 
+
 def is_cirillic(name_item: str) ->bool:
     """ Проверяет на вхождение кириллиы в строку """
     return bool(re.search('[а-яА-Я]', name_item))
@@ -27,6 +28,16 @@ def filteer_russian_names(names_list: list) -> list:
         if is_cirillic(name_item):
             new_names_list.append(name_item)
     return new_names_list
+
+
+def filteer_english_names(names_list: list) -> list:
+    """ Филтрацыя имен написанных на английском """
+    new_names_list = list()
+    for name_item in names_list:
+        if not is_cirillic(name_item):
+            new_names_list.append(name_item)
+    return new_names_list
+
 
 def save_to_file(file_name: str, data: str) -> None:
     """ Сохраняет данные в файл """
@@ -41,5 +52,10 @@ if __name__ == '__main__':
     filtered_names= filteer_russian_names(cleared_name)
     save_to_file(
         'russian_names.txt',
+        '\n'.join(filtered_names)
+    )
+    filtered_names= filteer_english_names(cleared_name)
+    save_to_file(
+        'english_names.txt',
         '\n'.join(filtered_names)
     )
