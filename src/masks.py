@@ -34,9 +34,9 @@ def get_mask_account(account_number: str) -> str:
 
     for i in now_nomber[::-1]:
         account += 1
-        if 6 >= account >= 3:
+        if account <= 2:
+            number += "*"
+        else:
             number += i
-        elif account <= 2:
-            i = "*"
-            number += i
+
     return str(number)
