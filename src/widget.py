@@ -1,5 +1,6 @@
 import re
 
+
 def mask_account_card(account_number: str) -> str:
     """
     Функция маскирует номер карты или счёта.
@@ -18,7 +19,7 @@ def mask_account_card(account_number: str) -> str:
         account = 0
         card_number = ""
 
-        digits = re.sub(r'\D', '', account_number)
+        digits = re.sub(r"\D", "", account_number)
 
         for card in digits:
             account += 1
@@ -36,7 +37,7 @@ def mask_account_card(account_number: str) -> str:
             if not i.isdigit():
                 score_resul += i
 
-        digits = re.sub(r'\D', '', account_number)
+        digits = re.sub(r"\D", "", account_number)
 
         account = 0
         number = ""
@@ -52,8 +53,9 @@ def mask_account_card(account_number: str) -> str:
         score_resul += number
     return score_resul
 
-def get_date(date):
+
+def get_date(date: str) -> str:
     """Преобразует строку с датой в формат ДД.ММ.ГГГГ"""
-    date_part = date.split('T')[0]
-    year, month, day = date_part.split('-')
+    date_part = date.split("T")[0]
+    year, month, day = date_part.split("-")
     return f"{day}.{month}.{year}"
