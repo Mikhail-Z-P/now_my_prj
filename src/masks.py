@@ -40,3 +40,4 @@ def get_mask_account(account_number: str) -> str:
             number += i
 
     return str(number)
+
