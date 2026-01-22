@@ -51,3 +51,9 @@ def mask_account_card(account_number: str) -> str:
                 number += i
         score_resul += number
     return score_resul
+
+def get_date(date):
+    """Преобразует строку с датой в формат ДД.ММ.ГГГГ"""
+    date_part = date.split('T')[0]
+    year, month, day = date_part.split('-')
+    return f"{day}.{month}.{year}"
