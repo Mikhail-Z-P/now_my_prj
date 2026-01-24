@@ -1,12 +1,12 @@
-# def summ(a, b):
-#     return a + b
-#
-# def main():
-#     d = summ(1, 4)
-# print(main)
-#
-# if __name__ == '__main__':
-#     print("Check", summ(4,5),"==", 9 )
+def summ(a, b):
+    return a + b
+
+def main():
+    d = summ(1, 4)
+print(main)
+
+if __name__ == '__main__':
+    print("Check", summ(4,5),"==", 9 )
 
 
 def lists(list_1: list, list_2: list) -> list:
