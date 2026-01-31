@@ -9,7 +9,7 @@ def get_mask_card_number(bank_card: str) -> str:
     card_number = ""
 
     # Извлекаем только цифры из входной строки
-    digits = re.sub(r'\D', '', bank_card)
+    digits = re.sub(r"\D", "", bank_card)
 
     for card in digits:
         account += 1

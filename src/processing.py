@@ -1,5 +1,4 @@
-
-def filter_by_state(list_dictionary, state="EXECUTED") -> list:
+def filter_by_state(list_dictionary: list, state: str = "EXECUTED") -> list:
     """Функция принимает список словарей и возвращает только соответствующие ключу stat"""
 
     now_list_dictionary = []
