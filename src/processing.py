@@ -1,12 +1,12 @@
 def filter_by_state(list_dictionary: list, state: str = "EXECUTED") -> list:
     """Функция принимает список словарей и возвращает только соответствующие ключу stat"""
 
-    now_list_dictionary = []
+    filtered_transactions = []
 
     for dictionary in list_dictionary:
         if dictionary["state"] == state:
-            now_list_dictionary.append(dictionary)
-    return now_list_dictionary
+            filtered_transactions .append(dictionary)
+    return filtered_transactions
 
 
 def sort_by_date(list_dictionary: list, sorting: bool = True) -> list:
