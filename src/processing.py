@@ -1,5 +1,6 @@
+
 def filter_by_state(list_dictionary, state="EXECUTED") -> list:
-    """Функцыя принимает список словарей и возвращяет только соответствующие ключу stat"""
+    """Функция принимает список словарей и возвращает только соответствующие ключу stat"""
 
     now_list_dictionary = []
 
@@ -9,9 +10,8 @@ def filter_by_state(list_dictionary, state="EXECUTED") -> list:
     return now_list_dictionary
 
 
+def sort_by_date(list_dictionary: list, sorting: bool = True) -> list:
+    """Функция сортирует список словарей по ключу date"""
 
-
-
-
-
-
+    sorted_list = sorted(list_dictionary, key=lambda x: x["date"], reverse=sorting)
+    return sorted_list
