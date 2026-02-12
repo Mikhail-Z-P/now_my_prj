@@ -53,3 +53,43 @@ def test_special_characters():
 
 
 
+
+def test_normal_length_6():
+    """Тест: ровно 6 символов — маскируем первые 2, оставляем последние 4."""
+    assert get_mask_account("123456") == "**3456"
+
+def test_normal_length_8():
+    """Тест: 8 символов — берём последние 6, маскируем первые 2 из них."""
+    assert get_mask_account("12345678") == "**5678"
+
+
+def test_length_10():
+    """Тест: 10 символов — берём последние 6, маскируем первые 2 из них"""
+    assert get_mask_account("1234567890") == "**7890"
+
+def test_short_length_5():
+    """Тест: 5 символов — маскируем первые 2 из последних 5"""
+    assert get_mask_account("12345") == "**345"
+
+def test_short_length_4():
+    """Тест: 4 символа — маскируем первые 2, оставляем 2."""
+    assert get_mask_account("1234") == "**34"
+
+def test_short_length_3():
+    """Тест: 3 символа — маскируем первые 2, остаётся 1."""
+    assert get_mask_account("123") == "**3"
+
+def test_short_length_2():
+    """Тест: 2 символа — заменяем оба на '*'."""
+    assert get_mask_account("12") == "**"
+
+def test_short_length_1():
+    """Тест: 1 символ — заменяем его на '*' (т.к. меньше 2)."""
+    assert get_mask_account("1") == "*"
+
+def test_empty_string():
+    """Тест: пустая строка — возвращаем пустую строку."""
+    assert get_mask_account("") == ""
+
+
+
