@@ -1,6 +1,6 @@
 import pytest
 import re
-from widget import mask_account_card, get_date
+from src.widget import mask_account_card, get_date
 
 def test_card_normal_16_digits():
     """Тест: стандартная карта 16 цифр — маскирует цыфры с 7 по 12."""

@@ -12,5 +12,10 @@ def filter_by_state(list_dictionary: list, state: str = "EXECUTED") -> list:
 def sort_by_date(list_dictionary: list, sorting: bool = True) -> list:
     """Функция сортирует список словарей по ключу date"""
 
-    sorted_list = sorted(list_dictionary, key=lambda x: x["date"], reverse=sorting)
-    return sorted_list
+    filtered = [
+        item for item in list_dictionary
+        if "date" in item and item["date"] is not None
+    ]
+    return sorted(filtered, key=lambda x: x["date"], reverse=not sorting)
+
+
