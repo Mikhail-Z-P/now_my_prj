@@ -20,6 +20,8 @@ def mask_account_card(account_number: str) -> str:
         card_number = ""
 
         digits = re.sub(r"\D", "", account_number)
+        if len(digits) < 16:
+            return ""
 
         for card in digits:
             account += 1
@@ -51,6 +53,7 @@ def mask_account_card(account_number: str) -> str:
             else:
                 number += i
         score_resul += number
+
     return score_resul
 
 

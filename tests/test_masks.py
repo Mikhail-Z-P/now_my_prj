@@ -50,10 +50,6 @@ def test_special_characters():
     result = get_mask_card_number("1234\t5678\n9012\3456")
     assert result == ""
 
-
-
-
-
 def test_normal_length_6():
     """Тест: ровно 6 символов — маскируем первые 2, оставляем последние 4."""
     assert get_mask_account("123456") == "**3456"
