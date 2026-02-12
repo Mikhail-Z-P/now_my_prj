@@ -19,7 +19,7 @@ def get_mask_card_number(bank_card: str) -> str:
         count_four += 1
         if count_four % 4 == 0 and account != len(digits):
             card_number += " "
-    if  account < 16 or account > 16:
+    if account < 16 or account > 16:
         return ""
     else:
         return str(card_number)

@@ -1,5 +1,6 @@
 import re
 
+
 def mask_account_card(account_number: str) -> str:
     """
     Функция маскирует номер карты или счёта.
