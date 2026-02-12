@@ -4,7 +4,7 @@ def filter_by_state(list_dictionary: list, state: str = "EXECUTED") -> list:
     filtered_transactions = []
 
     for dictionary in list_dictionary:
-        if dictionary["state"] == state:
+        if "state" in dictionary and dictionary["state"] == state:
             filtered_transactions .append(dictionary)
     return filtered_transactions
 
