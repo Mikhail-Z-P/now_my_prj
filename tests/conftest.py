@@ -149,3 +149,88 @@ def mask_account_test_cases():
             "description": "Пустая строка — возвращаем пустую строку."
         }
     ]
+
+
+@pytest.fixture
+def case_16_digit_card():
+    return "4000123456789012", "4000 12** **** 9012"
+
+@pytest.fixture
+def case_12_digit_card():
+    return "123456789012", ""
+
+@pytest.fixture
+def case_only_digits():
+    return "1111222233334444", "1111 22** **** 4444"
+
+@pytest.fixture
+def case_account_ru():
+    return "Счёт 123456789", "Счёт **6789"
+
+@pytest.fixture
+def case_account_en():
+    return "Счет 987654321", "Счет **4321"
+
+@pytest.fixture
+def case_short_account():
+    return "Счёт 12345", "Счёт **345"
+
+@pytest.fixture
+def case_single_digit():
+    return "Счёт 5", "Счёт *"
+
+@pytest.fixture
+def case_empty():
+    return "", ""
+
+@pytest.fixture
+def case_non_digits():
+    return "ABC-DEF", ""
+
+@pytest.fixture
+def case_whitespace():
+    return "   ", ""
+
+@pytest.fixture
+def case_none():
+    return None
+
+import pytest
+
+@pytest.fixture
+def date_standard():
+    return "2023-12-25T10:30:00", "25.12.2023"
+
+@pytest.fixture
+def date_edge_start():
+    return "2023-01-01T00:00:00", "01.01.2023"
+
+@pytest.fixture
+def date_edge_end():
+    return "2023-12-31T23:59:59", "31.12.2023"
+
+@pytest.fixture
+def date_leap():
+    return "2024-02-29T12:00:00", "29.02.2024"
+
+@pytest.fixture
+def date_single_digit():
+    return "2023-01-01T00:00:00", "01.01.2023"
+
+
+@pytest.fixture
+def date_min():
+    return "1900-01-01T00:00:00", "01.01.1900"
+
+@pytest.fixture
+def date_max():
+    return "9999-12-31T23:59:59", "31.12.9999"
+
+
+@pytest.fixture
+def empty_str():
+    return ""
+
+@pytest.fixture
+def whitespace_str():
+    return "   "
