@@ -234,3 +234,160 @@ def empty_str():
 @pytest.fixture
 def whitespace_str():
     return "   "
+
+@pytest.fixture
+def trans_default():
+    return [
+        {"id": 1, "state": "EXECUTED"},
+        {"id": 2, "state": "PENDING"},
+        {"id": 3, "state": "EXECUTED"}
+    ], [
+        {"id": 1, "state": "EXECUTED"},
+        {"id": 3, "state": "EXECUTED"}
+    ]
+
+@pytest.fixture
+def trans_custom():
+    return [
+        {"id": 1, "state": "EXECUTED"},
+        {"id": 2, "state": "PENDING"},
+        {"id": 3, "state": "FAILED"}
+    ], [{"id": 2, "state": "PENDING"}]
+
+@pytest.fixture
+def empty_trans():
+    return [], []
+
+@pytest.fixture
+def trans_no_match():
+    return [
+        {"id": 1, "state": "PENDING"},
+        {"id": 2, "state": "FAILED"}
+    ], []
+
+@pytest.fixture
+def trans_missing_key():
+    return [
+        {"id": 1, "state": "EXECUTED"},
+        {"id": 2, "status": "PENDING"},
+        {"id": 3, "state": "EXECUTED"}
+    ], [
+        {"id": 1, "state": "EXECUTED"},
+        {"id": 3, "state": "EXECUTED"}
+    ]
+
+@pytest.fixture
+def trans_all_match():
+    data = [
+        {"id": 1, "state": "EXECUTED"},
+        {"id": 2, "state": "EXECUTED"},
+        {"id": 3, "state": "EXECUTED"}
+    ]
+    return data, data
+
+@pytest.fixture
+def trans_case_sensitive():
+    return [
+        {"id": 1, "state": "executed"},
+        {"id": 2, "state": "EXECUTED"},
+        {"id": 3, "state": "Executed"}
+    ], [{"id": 2, "state": "EXECUTED"}]
+
+@pytest.fixture
+def trans_non_string():
+    return [
+        {"id": 1, "state": 1},
+        {"id": 2, "state": 2}
+    ], [{"id": 1, "state": 1}]
+
+@pytest.fixture
+def data_asc():
+    return [
+        {"id": 1, "date": "2023-01-15"},
+        {"id": 2, "date": "2022-12-01"},
+        {"id": 3, "date": "2023-03-10"}
+    ], [
+        {"id": 2, "date": "2022-12-01"},
+        {"id": 1, "date": "2023-01-15"},
+        {"id": 3, "date": "2023-03-10"}
+    ]
+
+@pytest.fixture
+def data_desc():
+    return [
+        {"id": 1, "date": "2023-01-15"},
+        {"id": 2, "date": "2022-12-01"},
+        {"id": 3, "date": "2023-03-10"}
+    ], [
+        {"id": 3, "date": "2023-03-10"},
+        {"id": 1, "date": "2023-01-15"},
+        {"id": 2, "date": "2022-12-01"}
+    ]
+
+@pytest.fixture
+def empty():
+    return [], []
+
+@pytest.fixture
+def single():
+    t = [{"id": 1, "date": "2023-01-01"}]
+    return t, t
+
+@pytest.fixture
+def missing_date():
+    return [
+        {"id": 1, "date": "2023-01-15"},
+        {"id": 2, "amount": 100},
+        {"id": 3, "date": "2022-12-01"}
+    ], [
+        {"id": 3, "date": "2022-12-01"},
+        {"id": 1, "date": "2023-01-15"}
+    ]
+
+@pytest.fixture
+def same_dates():
+    return [
+        {"id": 1, "date": "2023-01-15"},
+        {"id": 2, "date": "2023-01-15"},
+        {"id": 3, "date": "2022-12-01"}
+    ], [
+        {"id": 3, "date": "2022-12-01"},
+        {"id": 1, "date": "2023-01-15"},
+        {"id": 2, "date": "2023-01-15"}
+    ]
+
+@pytest.fixture
+def iso_dates():
+    return [
+        {"id": 1, "date": "2023-01-15T10:30:00"},
+        {"id": 2, "date": "2022-12-01T08:15:00"},
+        {"id": 3, "date": "2023-03-10T14:45:00"}
+    ], [
+        {"id": 2, "date": "2022-12-01T08:15:00"},
+        {"id": 1, "date": "2023-01-15T10:30:00"},
+        {"id": 3, "date": "2023-03-10T14:45:00"}
+    ]
+
+@pytest.fixture
+def orig():
+    return [{"id": 1, "date": "2023-01-15"}, {"id": 2, "date": "2022-12-01"}]
+
+@pytest.fixture
+def num_dates():
+    return [
+        {"id": 1, "date": 1673769600},
+        {"id": 2, "date": 1669852800},
+        {"id": 3, "date": 1681075200}
+    ], [
+        {"id": 2, "date": 1669852800},
+        {"id": 1, "date": 1673769600},
+        {"id": 3, "date": 1681075200}
+    ]
+
+@pytest.fixture
+def mixed():
+    return [
+        {"id": 1, "date": "2023-01-15"},
+        {"id": 2, "date": 1669852800},
+        {"id": 3, "date": "2022-12-01"}
+    ]
