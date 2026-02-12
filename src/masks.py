@@ -2,13 +2,12 @@ import re
 
 
 def get_mask_card_number(bank_card: str) -> str:
-    """Функцыя разделяет каждые четыре цыфры по блокам  и скрывает цыфры идущие посло 6 и до 4 с конца"""
+    """Функцыя разделяет каждые четыре цыфры по блокам и скрывает цыфры идущие посло 6 и до 4 с конца"""
 
     count_four = 0
     account = 0
     card_number = ""
 
-    # Извлекаем только цифры из входной строки
     digits = re.sub(r"\D", "", bank_card)
 
     for card in digits:
@@ -20,23 +19,15 @@ def get_mask_card_number(bank_card: str) -> str:
         count_four += 1
         if count_four % 4 == 0 and account != len(digits):
             card_number += " "
-
-    return str(card_number)
+    if account < 16 or account > 16:
+        return ""
+    else:
+        return str(card_number)
 
 
 def get_mask_account(account_number: str) -> str:
     """Функцыя оставляет последнии шесть цыфр счета, первые две изменены на звездочки"""
 
-    account = 0
-    number = ""
-    reversed_number = account_number[::-1]
-    now_nomber = reversed_number[:6]
-
-    for i in now_nomber[::-1]:
-        account += 1
-        if account <= 2:
-            number += "*"
-        else:
-            number += i
-
-    return str(number)
+    last_six = account_number[-6:] if account_number else ""
+    masked = "**" + last_six[2:] if len(last_six) > 2 else "*" * min(2, len(last_six)) + last_six[2:]
+    return masked
