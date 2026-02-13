@@ -2,6 +2,7 @@ import pytest
 
 from src.widget import get_date, mask_account_card
 
+
 @pytest.mark.parametrize(
     "case",
     [
@@ -17,12 +18,13 @@ from src.widget import get_date, mask_account_card
         "строка из цифр",
         "аккаунт (русифицированный)",
         "аккаунт (англоязычный)",
-    ]
+    ],
 )
 def test_mask_account_card(case, request):
     """Проверка маскировки аккаунта для разных форматов данных."""
     input_val, expected = request.getfixturevalue(case)
     assert mask_account_card(input_val) == expected
+
 
 # def test_16_digit_card(case_16_digit_card):
 #     """Проверка маскировки 16-значной карты."""

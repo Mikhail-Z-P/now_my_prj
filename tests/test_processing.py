@@ -2,17 +2,22 @@ import pytest
 
 from src.processing import filter_by_state, sort_by_date
 
-@pytest.mark.parametrize("fixture,state", [
-    ("trans_default", None),
-    ("trans_custom", "PENDING"),
-    ("empty_trans", None),
-    ("trans_no_match", "EXECUTED"),
-    ("trans_missing_key", None),
-])
+
+@pytest.mark.parametrize(
+    "fixture,state",
+    [
+        ("trans_default", None),
+        ("trans_custom", "PENDING"),
+        ("empty_trans", None),
+        ("trans_no_match", "EXECUTED"),
+        ("trans_missing_key", None),
+    ],
+)
 def test_filter_by_state(fixture, state, request):
     transactions, expected = request.getfixturevalue(fixture)
     result = filter_by_state(transactions, state=state) if state else filter_by_state(transactions)
     assert result == expected
+
 
 # def test_default(trans_default):
 #     """Проверяет базовую фильтрацию транзакций."""

@@ -1,5 +1,7 @@
-from src.masks import get_mask_account, get_mask_card_number
 import pytest
+
+from src.masks import get_mask_account, get_mask_card_number
+
 
 @pytest.mark.parametrize(
     "input, expected, desc",
@@ -8,11 +10,12 @@ import pytest
         ("7000 7922-8960-6361", "7000 79** **** 6361", "с пробелами/дефисами"),
         ("12345", "", "короче 6 цифр"),
         ("12345678901234567890", "", "длиннее 16 цифр"),
-    ]
+    ],
 )
 def test_mask_card(input, expected, desc):
     result = get_mask_card_number(input)
     assert result == expected, f"{desc}: got '{result}', expected '{expected}'"
+
 
 # def test_standard_16_digits(standard_16_digit_cases):
 #     """Тестируем стандартный 16-значный номер карты."""
