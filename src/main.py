@@ -59,5 +59,6 @@ if __name__ == "__main__":
     descriptions = transaction_descriptions(transactions)
     for _ in range(2):
         print(next(descriptions))
+
     for card_number in card_number_generator(11, 32):
         print(card_number)
