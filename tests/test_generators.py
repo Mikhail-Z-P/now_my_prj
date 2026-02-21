@@ -82,3 +82,50 @@ def test_parametrized(transactions, expected):
     assert list(gen) == expected
 
 
+def test_basic_functionality(valid_range):
+    """Проверка базовой работы генератора"""
+    start, stop = valid_range
+    gen = card_number_generator(start, stop)
+    results = list(gen)
+    assert len(results) == stop - start
+    assert results[0] == "1234 5678 9012 3450"
+    assert results[-1] == "1234 5678 9012 3454"
+
+def test_single_number(single_number_range):
+    """Проверка генерации одного номера"""
+    start, stop = single_number_range
+    gen = card_number_generator(start, stop)
+    result = list(gen)
+    assert result == ["1111 1111 1111 1111"]
+
+def test_zero_start(zero_start_range):
+    """Проверка генерации с нулевого значения"""
+    start, stop = zero_start_range
+    gen = card_number_generator(start, stop)
+    results = list(gen)
+    assert results == [
+        "0000 0000 0000 0000",
+        "0000 0000 0000 0001",
+        "0000 0000 0000 0002",
+        "0000 0000 0000 0003",
+        "0000 0000 0000 0004",
+        "0000 0000 0000 0005",
+        "0000 0000 0000 0006",
+        "0000 0000 0000 0007",
+        "0000 0000 0000 0008",
+        "0000 0000 0000 0009"
+    ]
+
+@pytest.mark.parametrize("start,stop,expected_count", [
+    pytest.param(1234, 1237, 3, id="малый диапазон"),
+    pytest.param(9999999999999990, 9999999999999999, 9, id="большой диапазон"),
+    pytest.param(0, 1, 1, id="один элемент"),
+    pytest.param(1000000000000000, 1000000000000005, 5, id="средний диапазон")
+])
+def test_parametrized(start, stop, expected_count):
+    """Параметризованные тесты"""
+    gen = card_number_generator(start, stop)
+    results = list(gen)
+    assert len(results) == expected_count
+    assert all(len(num.replace(" ", "")) == 16 for num in results)
+    assert all(len(num.split()) == 4 for num in results)
