@@ -1,6 +1,3 @@
-
-
-
 def filter_by_currency(transactions: list[dict], currency: str) -> iter:
     """
     Генерирует транзакции из списка, у которых валюта операции
@@ -26,4 +23,4 @@ def card_number_generator(start , stop):
 
         formatted_card = f"{card_str[0:4]} {card_str[4:8]} {card_str[8:12]} {card_str[12:16]}"
 
-        yield formatted_card 
+        yield formatted_card

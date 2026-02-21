@@ -313,3 +313,30 @@ def num_dates():
 @pytest.fixture
 def mixed():
     return [{"id": 1, "date": "2023-01-15"}, {"id": 2, "date": 1669852800}, {"id": 3, "date": "2022-12-01"}]
+
+@pytest.fixture
+def sample_transactions():
+    """Фикстура: тестовые транзакции с разными валютами."""
+    return [
+        {
+            "id": 1,
+            "operationAmount": {"currency": {"code": "USD"}}
+        },
+        {
+            "id": 2,
+            "operationAmount": {"currency": {"code": "EUR"}}
+        },
+        {
+            "id": 3,
+            "operationAmount": {"currency": {"code": "USD"}}
+        },
+        {
+            "id": 4,
+            "operationAmount": {}  # нет валюты
+        }
+    ]
+
+@pytest.fixture
+def empty_transactions():
+    """Фикстура: пустой список транзакций."""
+    return []
