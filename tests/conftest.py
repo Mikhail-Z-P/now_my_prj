@@ -340,3 +340,47 @@ def sample_transactions():
 def empty_transactions():
     """Фикстура: пустой список транзакций."""
     return []
+
+@pytest.fixture
+def transactions_with_descriptions():
+    """Транзакции с разными описаниями"""
+    return [
+        {"id": 1, "description": "Перевод организации"},
+        {"id": 2, "description": "Снятие наличных"},
+        {"id": 3, "description": "Пополнение счета"}
+    ]
+
+@pytest.fixture
+def transactions_without_descriptions():
+    """Транзакции без описаний"""
+    return [
+        {"id": 1},
+        {"id": 2, "amount": 1000},
+        {"id": 3, "type": "debit"}
+    ]
+
+@pytest.fixture
+def empty_transactions():
+    """Пустой список транзакций"""
+    return []
+
+
+@pytest.fixture
+def valid_range():
+    """Валидный диапазон номеров карт"""
+    return 1234567890123450, 1234567890123455
+
+@pytest.fixture
+def single_number_range():
+    """Диапазон с одним номером"""
+    return 1111111111111111, 1111111111111112
+
+@pytest.fixture
+def zero_start_range():
+    """Диапазон с нулями"""
+    return 0, 10
+
+@pytest.fixture
+def large_range():
+    """Большой диапазон номеров"""
+    return 9999999999999990, 9999999999999999

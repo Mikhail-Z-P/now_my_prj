@@ -1,5 +1,6 @@
 import pytest
-from generators import filter_by_currency
+from generators import filter_by_currency, transaction_descriptions, card_number_generator
+
 
 
 @pytest.mark.parametrize("currency,expected_ids", [
@@ -35,3 +36,49 @@ def test_missing_operation_amount():
     transactions = [{"id": 1}]  # нет operationAmount
     result = list(filter_by_currency(transactions, "USD"))
     assert result == []
+
+
+def test_basic_functionality(transactions_with_descriptions):
+    """Проверка базовой работы генератора"""
+    gen = transaction_descriptions(transactions_with_descriptions)
+    results = list(gen)
+    assert results == [
+        "Перевод организации",
+        "Снятие наличных",
+        "Пополнение счета"
+    ]
+
+def test_missing_descriptions(transactions_without_descriptions):
+    """Проверка транзакций без описаний"""
+    gen = transaction_descriptions(transactions_without_descriptions)
+    results = list(gen)
+    assert results == [None, None, None]
+
+def test_empty_transactions(empty_transactions):
+    """Проверка пустого списка"""
+    gen = transaction_descriptions(empty_transactions)
+    assert list(gen) == []
+
+@pytest.mark.parametrize("transactions,expected", [
+    pytest.param(
+        [{"description": "Оплата услуг"}],
+        ["Оплата услуг"],
+        id="один элемент"
+    ),
+    pytest.param(
+        [{"description": "Покупка"}, {"description": "Продажа"}],
+        ["Покупка", "Продажа"],
+        id="несколько элементов"
+    ),
+    pytest.param(
+        [],
+        [],
+        id="пустой список"
+    )
+])
+def test_parametrized(transactions, expected):
+    """Параметризованные тесты"""
+    gen = transaction_descriptions(transactions)
+    assert list(gen) == expected
+
+
