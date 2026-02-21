@@ -314,32 +314,23 @@ def num_dates():
 def mixed():
     return [{"id": 1, "date": "2023-01-15"}, {"id": 2, "date": 1669852800}, {"id": 3, "date": "2022-12-01"}]
 
+
 @pytest.fixture
 def sample_transactions():
     """Фикстура: тестовые транзакции с разными валютами."""
     return [
-        {
-            "id": 1,
-            "operationAmount": {"currency": {"code": "USD"}}
-        },
-        {
-            "id": 2,
-            "operationAmount": {"currency": {"code": "EUR"}}
-        },
-        {
-            "id": 3,
-            "operationAmount": {"currency": {"code": "USD"}}
-        },
-        {
-            "id": 4,
-            "operationAmount": {}  # нет валюты
-        }
+        {"id": 1, "operationAmount": {"currency": {"code": "USD"}}},
+        {"id": 2, "operationAmount": {"currency": {"code": "EUR"}}},
+        {"id": 3, "operationAmount": {"currency": {"code": "USD"}}},
+        {"id": 4, "operationAmount": {}},  # нет валюты
     ]
+
 
 @pytest.fixture
 def empty_transactions():
     """Фикстура: пустой список транзакций."""
     return []
+
 
 @pytest.fixture
 def transactions_with_descriptions():
@@ -347,22 +338,14 @@ def transactions_with_descriptions():
     return [
         {"id": 1, "description": "Перевод организации"},
         {"id": 2, "description": "Снятие наличных"},
-        {"id": 3, "description": "Пополнение счета"}
+        {"id": 3, "description": "Пополнение счета"},
     ]
+
 
 @pytest.fixture
 def transactions_without_descriptions():
     """Транзакции без описаний"""
-    return [
-        {"id": 1},
-        {"id": 2, "amount": 1000},
-        {"id": 3, "type": "debit"}
-    ]
-
-@pytest.fixture
-def empty_transactions():
-    """Пустой список транзакций"""
-    return []
+    return [{"id": 1}, {"id": 2, "amount": 1000}, {"id": 3, "type": "debit"}]
 
 
 @pytest.fixture
@@ -370,15 +353,18 @@ def valid_range():
     """Валидный диапазон номеров карт"""
     return 1234567890123450, 1234567890123455
 
+
 @pytest.fixture
 def single_number_range():
     """Диапазон с одним номером"""
     return 1111111111111111, 1111111111111112
 
+
 @pytest.fixture
 def zero_start_range():
     """Диапазон с нулями"""
     return 0, 10
+
 
 @pytest.fixture
 def large_range():

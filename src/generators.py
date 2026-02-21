@@ -4,8 +4,9 @@ def filter_by_currency(transactions: list[dict], currency: str) -> iter:
     совпадает с указанной.
     """
     for transaction in transactions:
-        if transaction.get('operationAmount', {}).get('currency', {}).get('code') == currency:
+        if transaction.get("operationAmount", {}).get("currency", {}).get("code") == currency:
             yield transaction
+
 
 def transaction_descriptions(transactions: list[dict]) -> iter:
     """
@@ -14,9 +15,10 @@ def transaction_descriptions(transactions: list[dict]) -> iter:
     if not transactions:
         return
     for transaction in transactions:
-        yield transaction.get('description')
+        yield transaction.get("description")
 
-def card_number_generator(start , stop):
+
+def card_number_generator(start, stop):
     """Генератор номеров карт формата XXXX XXXX XXXX XXXX в диапазоне start, stop"""
     for number in range(start, stop):
         card_str = str(number).zfill(16)
