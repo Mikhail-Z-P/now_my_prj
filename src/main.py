@@ -1,3 +1,4 @@
+from decorators import log
 from generators import card_number_generator, filter_by_currency, transaction_descriptions
 from masks import get_mask_account, get_mask_card_number
 from processing import filter_by_state, sort_by_date
@@ -121,3 +122,9 @@ if __name__ == "__main__":
 
     for card_number in card_number_generator(11, 32):
         print(card_number)
+
+    @log()
+    def fonc(x, y, d, da, ):
+        return x + y * d == x % da
+
+    fonc(1, 2, 100, 90)
