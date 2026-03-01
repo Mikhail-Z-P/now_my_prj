@@ -1,5 +1,6 @@
-from decorators import log
 import pytest
+
+from src.decorators import log
 
 
 def test_successful_console(capsys):
@@ -11,7 +12,6 @@ def test_successful_console(capsys):
     result = add(3, 5)
     captured = capsys.readouterr()
     output_lines = [line.strip() for line in captured.out.strip().split('\n') if line.strip()]
-
 
     assert result == 8
     assert len(output_lines) == 2
