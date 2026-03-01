@@ -2,7 +2,7 @@ from generators import card_number_generator, filter_by_currency, transaction_de
 from masks import get_mask_account, get_mask_card_number
 from processing import filter_by_state, sort_by_date
 from widget import get_date, mask_account_card
-
+from decorators import log
 if __name__ == "__main__":
     print(get_mask_account("73654108430135874305"))
     print(get_mask_card_number("7000792289606361"))
@@ -121,3 +121,9 @@ if __name__ == "__main__":
 
     for card_number in card_number_generator(11, 32):
         print(card_number)
+
+    @log()
+    def fonc(x, y, d, da, ):
+        return x + y * d == x % da
+
+    fonc(1, 2, 100, 90)
