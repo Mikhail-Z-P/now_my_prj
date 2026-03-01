@@ -3,6 +3,7 @@ from masks import get_mask_account, get_mask_card_number
 from processing import filter_by_state, sort_by_date
 from widget import get_date, mask_account_card
 from decorators import log
+
 if __name__ == "__main__":
     print(get_mask_account("73654108430135874305"))
     print(get_mask_card_number("7000792289606361"))

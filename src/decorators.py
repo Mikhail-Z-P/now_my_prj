@@ -1,7 +1,6 @@
 import functools
 
 
-
 def log(filename=None):
     """
     Декоратор для логирования выполнения функций.
@@ -40,10 +39,3 @@ def log(filename=None):
                 raise
         return inner
     return wrapper
-
-
-
-
-
-
-
