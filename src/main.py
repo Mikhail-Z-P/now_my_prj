@@ -3,6 +3,8 @@ from generators import card_number_generator, filter_by_currency, transaction_de
 from masks import get_mask_account, get_mask_card_number
 from processing import filter_by_state, sort_by_date
 from widget import get_date, mask_account_card
+from external_api import get_exchange_rate
+from utils import load_transactions, process_transaction
 
 if __name__ == "__main__":
     print(get_mask_account("73654108430135874305"))
@@ -128,3 +130,25 @@ if __name__ == "__main__":
         return x + y * d == x % da
 
     fonc(1, 2, 100, 90)
+
+    transactions = load_transactions(r"C:\Users\persoona_VIP\pythonProject\now.my.prj\data\operations.json")
+    print(f"Загружено транзакций: {len(transactions)}")
+    print("Содержимое:", transactions)
+
+    rate_usd = get_exchange_rate('USD')
+    print(f"Курс USD: {rate_usd} RUB")
+
+    rate_eur = get_exchange_rate('EUR')
+    print(f"Курс EUR: {rate_eur} RUB")
+
+    rate = get_exchange_rate('JPY')
+    print(f"Курс JPY: {rate} RUB")
+
+    transaction_rub = {'amount': 5000, 'currency': 'RUB'}
+    result = process_transaction(transaction_rub)
+    print(f"Сумма в рублях: {result} RUB")
+
+
+    transaction_usd = {'amount': 100, 'currency': 'USD'}
+    result = process_transaction(transaction_usd)
+    print(f"Сумма в рублях: {result} RUB")
