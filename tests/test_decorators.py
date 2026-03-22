@@ -5,13 +5,14 @@ from src.decorators import log
 
 def test_successful_console(capsys):
     """Успешное выполнение — консоль."""
+
     @log()
     def add(a, b):
         return a + b
 
     result = add(3, 5)
     captured = capsys.readouterr()
-    output_lines = [line.strip() for line in captured.out.strip().split('\n') if line.strip()]
+    output_lines = [line.strip() for line in captured.out.strip().split("\n") if line.strip()]
 
     assert result == 8
     assert len(output_lines) == 2
@@ -21,6 +22,7 @@ def test_successful_console(capsys):
 
 def test_error_console(capsys):
     """Ошибка — консоль."""
+
     @log()
     def divide(x, y):
         return x / y
@@ -29,7 +31,7 @@ def test_error_console(capsys):
         divide(10, 0)
 
     captured = capsys.readouterr()
-    output_lines = [line.strip() for line in captured.out.strip().split('\n') if line.strip()]
+    output_lines = [line.strip() for line in captured.out.strip().split("\n") if line.strip()]
 
     assert len(output_lines) == 2
     assert output_lines[0] == "divide start. Inputs: (10, 0)"
@@ -38,13 +40,14 @@ def test_error_console(capsys):
 
 def test_kwargs_console(capsys):
     """Ключевые аргументы — консоль."""
+
     @log()
     def greet(name, greeting="Hello"):
         return f"{greeting}, {name}!"
 
     result = greet("Alice", greeting="Hi")
     captured = capsys.readouterr()
-    output_lines = [line.strip() for line in captured.out.strip().split('\n') if line.strip()]
+    output_lines = [line.strip() for line in captured.out.strip().split("\n") if line.strip()]
 
     assert result == "Hi, Alice!"
     assert output_lines[0] == "greet start. Inputs: ('Alice', greeting='Hi')"
@@ -62,7 +65,7 @@ def test_successful_file(tmp_path):
     result = mul(4, 6)
     assert result == 24
 
-    with open(log_file, 'r', encoding='utf-8') as f:
+    with open(log_file, "r", encoding="utf-8") as f:
         lines = [line.strip() for line in f.readlines()]
 
     assert len(lines) == 2
@@ -72,13 +75,14 @@ def test_successful_file(tmp_path):
 
 def test_no_args_console(capsys):
     """Без аргументов — консоль."""
+
     @log()
     def pi():
         return 3.14
 
     result = pi()
     captured = capsys.readouterr()
-    output_lines = [line.strip() for line in captured.out.strip().split('\n') if line.strip()]
+    output_lines = [line.strip() for line in captured.out.strip().split("\n") if line.strip()]
 
     assert abs(result - 3.14) < 1e-5
     assert output_lines[0] == "pi start. Inputs: ()"

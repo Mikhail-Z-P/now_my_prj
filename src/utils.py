@@ -1,6 +1,8 @@
 import json
 import os
-from external_api import get_exchange_rate
+
+from src.external_api import get_exchange_rate
+
 
 def load_transactions(json_path):
     """Загружает список словарей с транзакциями из JSON-файла."""
@@ -8,7 +10,7 @@ def load_transactions(json_path):
         if not os.path.exists(json_path):
             return []
 
-        with open(json_path, 'r', encoding='utf-8') as file:
+        with open(json_path, "r", encoding="utf-8") as file:
             data = json.load(file)
 
         return data if isinstance(data, list) else []
@@ -24,17 +26,17 @@ def process_transaction(transaction: dict) -> float:
     :return: Сумма в рублях (float)
     :raises ValueError: Если валюта не поддерживается или данные некорректны
     """
-    amount = transaction.get('amount')
-    currency = transaction.get('currency', '').upper()
+    amount = transaction.get("amount")
+    currency = transaction.get("currency", "").upper()
 
     if not amount or not currency:
         raise ValueError("Транзакция должна содержать 'amount' и 'currency'")
     if not isinstance(amount, (int, float)):
         raise ValueError(f"Сумма должна быть числом, получено: {type(amount)}")
 
-    if currency == 'RUB':
+    if currency == "RUB":
         return float(amount)
-    elif currency in ['USD', 'EUR']:
+    elif currency in ["USD", "EUR"]:
         rate = get_exchange_rate(currency)
         return float(amount) * rate
     else:
