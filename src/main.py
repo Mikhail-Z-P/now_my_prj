@@ -1,5 +1,5 @@
 from decorators import log
-from external_api import get_exchange_rate
+from external_api import convert_to_rub
 from generators import card_number_generator, filter_by_currency, transaction_descriptions
 from masks import get_mask_account, get_mask_card_number
 from processing import filter_by_state, sort_by_date
@@ -108,14 +108,15 @@ if __name__ == "__main__":
     print(f"Загружено транзакций: {len(transactions)}")
     print("Содержимое:", transactions)
 
-    rate_usd = get_exchange_rate("USD")
-    print(f"Курс USD: {rate_usd} RUB")
+    transactions = [
+        {"amount": 100, "currency": "USD"},
+        {"amount": 50, "currency": "EUR"},
+        {"amount": 1500, "currency": "RUB"}
+    ]
 
-    rate_eur = get_exchange_rate("EUR")
-    print(f"Курс EUR: {rate_eur} RUB")
-
-    rate = get_exchange_rate("JPY")
-    print(f"Курс JPY: {rate} RUB")
+    for transaction in transactions:
+        rub_amount = process_transaction(transaction)
+        print(f"{transaction['amount']} {transaction['currency']} → {rub_amount:.2f} руб.")
 
     transaction_rub = {"amount": 5000, "currency": "RUB"}
     result = process_transaction(transaction_rub)
@@ -124,3 +125,7 @@ if __name__ == "__main__":
     transaction_usd = {"amount": 100, "currency": "USD"}
     result = process_transaction(transaction_usd)
     print(f"Сумма в рублях: {result} RUB")
+
+    transaction = {"amount": 100, "currency": "USD"}
+    rub_amount = convert_to_rub(transaction)
+    print(f"100 USD = {rub_amount} руб.")

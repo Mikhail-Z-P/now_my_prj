@@ -1,7 +1,7 @@
 import json
 import os
 
-from src.external_api import get_exchange_rate
+from src.external_api import convert_to_rub
 
 
 def load_transactions(json_path):
@@ -26,18 +26,12 @@ def process_transaction(transaction: dict) -> float:
     :return: Сумма в рублях (float)
     :raises ValueError: Если валюта не поддерживается или данные некорректны
     """
-    amount = transaction.get("amount")
-    currency = transaction.get("currency", "").upper()
+    if "amount" not in transaction or "currency" not in transaction:
+        raise ValueError("Транзакция должна содержать поля 'amount' и 'currency'")
 
-    if not amount or not currency:
-        raise ValueError("Транзакция должна содержать 'amount' и 'currency'")
-    if not isinstance(amount, (int, float)):
-        raise ValueError(f"Сумма должна быть числом, получено: {type(amount)}")
+        # Проверка типа суммы
+    if not isinstance(transaction["amount"], (int, float)):
+        raise ValueError(f"Сумма должна быть числом, получено: {type(transaction['amount'])}")
 
-    if currency == "RUB":
-        return float(amount)
-    elif currency in ["USD", "EUR"]:
-        rate = get_exchange_rate(currency)
-        return float(amount) * rate
-    else:
-        raise ValueError(f"Неподдерживаемая валюта: {currency}")
+        # Конвертация через API
+    return convert_to_rub(transaction)

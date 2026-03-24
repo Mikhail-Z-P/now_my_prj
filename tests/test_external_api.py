@@ -1,88 +1,91 @@
-from unittest.mock import Mock, patch
+from unittest.mock import patch, Mock
+from external_api import convert_to_rub
 
-import requests
+def test_usd_conversion_success():
+    """Тест успешной конвертации USD → RUB через API"""
+    with patch('external_api.requests.get') as mock_get:
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"result": 9500.0}
+        mock_get.return_value = mock_response
 
-from src.external_api import get_exchange_rate
+        transaction = {"amount": 100, "currency": "USD"}
+        result = convert_to_rub(transaction)
 
+        assert result == 9500.0, f"Ожидалось 9500.0, получено {result}"
+        mock_get.assert_called_once()
 
-def test_successful_usd_rate():
-    """Тест: успешный запрос курса USD → вернуть курс из API."""
-    mock_response = Mock()
-    mock_response.raise_for_status = Mock()
-    mock_response.json.return_value = {"rates": {"USD": 75.5}}
+def test_eur_conversion_success():
+    """Тест успешной конвертации EUR → RUB через API"""
+    with patch('external_api.requests.get') as mock_get:
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"result": 10500.0}
+        mock_get.return_value = mock_response
 
-    with patch("requests.get", return_value=mock_response):
-        result = get_exchange_rate("USD")
-        assert result == 75.5
+        transaction = {"amount": 100, "currency": "EUR"}
+        result = convert_to_rub(transaction)
 
+        assert result == 10500.0, f"Ожидалось 10500.0, получено {result}"
 
-def test_successful_eur_rate():
-    """Тест: успешный запрос курса EUR → вернуть курс из API."""
-    mock_response = Mock()
-    mock_response.raise_for_status = Mock()
-    mock_response.json.return_value = {"rates": {"EUR": 82.3}}
+def test_rub_currency_no_conversion():
+    """Тест для валюты RUB — конвертация не нужна"""
+    transaction = {"amount": 5000, "currency": "RUB"}
+    result = convert_to_rub(transaction)
+    assert result == 5000.0, f"Ожидалось 5000.0, получено {result}"
 
-    with patch("requests.get", return_value=mock_response):
-        result = get_exchange_rate("EUR")
-        assert result == 82.3
+def test_unsupported_currency():
+    """Тест для неподдерживаемой валюты"""
+    transaction = {"amount": 100, "currency": "JPY"}
+    try:
+        convert_to_rub(transaction)
+        assert False, "Ожидалась ошибка ValueError"
+    except ValueError as e:
+        assert "Неподдерживаемая валюта" in str(e), f"Неверный текст ошибки: {e}"
 
+def test_api_unauthorized_401():
+    """Тест обработки ошибки 401 Unauthorized"""
+    with patch('external_api.requests.get') as mock_get:
+        mock_response = Mock()
+        mock_response.status_code = 401
+        mock_get.return_value = mock_response
 
-def test_network_error():
-    """Тест: ошибка сети (RequestException) → вернуть 1.0."""
-    with patch("requests.get", side_effect=requests.exceptions.RequestException("Network error")):
-        result = get_exchange_rate("USD")
-        assert result == 1.0
+        transaction = {"amount": 100, "currency": "USD"}
+        result = convert_to_rub(transaction)
+        assert result == 100.0, f"Ожидалось 100.0, получено {result}"
 
+def test_api_network_error():
+    """Тест обработки сетевой ошибки"""
+    with patch('external_api.requests.get', side_effect=Exception("Network error")):
+        transaction = {"amount": 200, "currency": "EUR"}
+        result = convert_to_rub(transaction)
+        assert result == 200.0, f"Ожидалось 200.0, получено {result}"
 
-def test_api_http_error():
-    """Тест: HTTP‑ошибка от API → вернуть 1.0."""
-    mock_response = Mock()
-    mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError("404 Not Found")
+def test_api_missing_result_field():
+    """Тест обработки ответа API без поля 'result'"""
+    with patch('external_api.requests.get') as mock_get:
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"rate": 90.0}
+        mock_get.return_value = mock_response
 
-    with patch("requests.get", return_value=mock_response):
-        result = get_exchange_rate("USD")
-        assert result == 1.0
+        transaction = {"amount": 100, "currency": "USD"}
+        result = convert_to_rub(transaction)
+        assert result == 100.0, f"Ожидалось 100.0, получено {result}"
 
+def test_invalid_transaction_structure():
+    """Тест с некорректной структурой транзакции"""
+    # Отсутствует поле 'currency'
+    transaction1 = {"amount": 100}
+    try:
+        convert_to_rub(transaction1)
+        assert False, "Ожидалась KeyError при отсутствии 'currency'"
+    except KeyError:
+        pass
 
-def test_missing_currency_in_response():
-    """Тест: валюта отсутствует в ответе API (KeyError) → вернуть 1.0."""
-    mock_response = Mock()
-    mock_response.raise_for_status = Mock()
-    mock_response.json.return_value = {"rates": {}}
-
-    with patch("requests.get", return_value=mock_response):
-        result = get_exchange_rate("JPY")
-        assert result == 1.0
-
-
-def test_empty_rates_in_response():
-    """Тест: поле 'rates' отсутствует в ответе → вернуть 1.0."""
-    mock_response = Mock()
-    mock_response.raise_for_status = Mock()
-    mock_response.json.return_value = {}
-
-    with patch("requests.get", return_value=mock_response):
-        result = get_exchange_rate("USD")
-        assert result == 1.0
-
-
-def test_large_currency_code():
-    """Тест: длинный код валюты → корректно обработать или вернуть 1.0 при ошибке."""
-    mock_response = Mock()
-    mock_response.raise_for_status = Mock()
-    mock_response.json.return_value = {"rates": {"VERY_LONG_CODE": 100.0}}
-
-    with patch("requests.get", return_value=mock_response):
-        result = get_exchange_rate("VERY_LONG_CODE")
-        assert result == 100.0
-
-
-def test_zero_rate():
-    """Тест: курс равен 0 → вернуть 0.0."""
-    mock_response = Mock()
-    mock_response.raise_for_status = Mock()
-    mock_response.json.return_value = {"rates": {"USD": 0.0}}
-
-    with patch("requests.get", return_value=mock_response):
-        result = get_exchange_rate("USD")
-        assert result == 0.0
+    transaction2 = {"currency": "USD"}
+    try:
+        convert_to_rub(transaction2)
+        assert False, "Ожидалась KeyError при отсутствии 'amount'"
+    except KeyError:
+        pass
