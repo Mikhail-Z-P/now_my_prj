@@ -1,25 +1,32 @@
 import os
 
 import requests
-from dotenv import load_dotenv
-
-load_dotenv()
 
 API_KEY = os.environ.get("EXCHANGE_RATES_API_KEY")
-API_URL = "https://api.exchangerate-api.com/v4/latest/RUB"
+API_URL = "https://api.apilayer.com/exchangerates_data/convert"
 
 
-def get_exchange_rate(currency: str) -> float:
+def convert_to_rub(transaction: dict) -> float:
     """
-    Получает текущий курс валюты относительно рубля.
-    :param currency: Код валюты (например, 'USD', 'EUR')
-    :return: Курс валюты в рублях (float)
+    Конвертирует сумму транзакции в рубли через API.
+    :param transaction: славарь с полями 'amount' (число) и 'currency' (строка)
+    :return: сумма в рублях (float)
     """
-    try:
-        response = requests.get(API_URL, params={"access_key": API_KEY})
-        response.raise_for_status()
-        data = response.json()
-        return data["rates"][currency]
-    except (requests.RequestException, KeyError) as e:
-        print(f"Ошибка при получении курса валюты {currency}: {e}")
-        return 1.0
+    print(f"API_KEY: {API_KEY}")
+    print(f"URL: {API_URL}")
+    amount = transaction["amount"]
+    currency = transaction["currency"].upper()
+
+    if currency == "RUB":
+        return float(amount)
+
+    if currency not in ["USD", "EUR"]:
+        raise ValueError(f"Неподдерживаемая валюта: {currency}")
+    params = {"from": currency, "to": "RUB", "amount": amount}
+    headers = {"apikey": API_KEY}
+
+    response = requests.get(API_URL, headers=headers, params=params, timeout=10)
+    response.raise_for_status()
+
+    data = response.json()
+    return float(data["result"])
