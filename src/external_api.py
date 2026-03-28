@@ -1,6 +1,9 @@
 import os
 
 import requests
+from dotenv import load_dotenv
+
+load_dotenv()
 
 API_KEY = os.environ.get("EXCHANGE_RATES_API_KEY")
 API_URL = "https://api.apilayer.com/exchangerates_data/convert"
