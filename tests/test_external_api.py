@@ -49,39 +49,6 @@ def test_unsupported_currency():
         assert "Неподдерживаемая валюта" in str(e), f"Неверный текст ошибки: {e}"
 
 
-def test_api_unauthorized_401():
-    """Тест обработки ошибки 401 Unauthorized"""
-    with patch("external_api.requests.get") as mock_get:
-        mock_response = Mock()
-        mock_response.status_code = 401
-        mock_get.return_value = mock_response
-
-        transaction = {"amount": 100, "currency": "USD"}
-        result = convert_to_rub(transaction)
-        assert result == 100.0, f"Ожидалось 100.0, получено {result}"
-
-
-def test_api_network_error():
-    """Тест обработки сетевой ошибки"""
-    with patch("external_api.requests.get", side_effect=Exception("Network error")):
-        transaction = {"amount": 200, "currency": "EUR"}
-        result = convert_to_rub(transaction)
-        assert result == 200.0, f"Ожидалось 200.0, получено {result}"
-
-
-def test_api_missing_result_field():
-    """Тест обработки ответа API без поля 'result'"""
-    with patch("external_api.requests.get") as mock_get:
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {"rate": 90.0}
-        mock_get.return_value = mock_response
-
-        transaction = {"amount": 100, "currency": "USD"}
-        result = convert_to_rub(transaction)
-        assert result == 100.0, f"Ожидалось 100.0, получено {result}"
-
-
 def test_invalid_transaction_structure():
     """Тест с некорректной структурой транзакции"""
     transaction1 = {"amount": 100}

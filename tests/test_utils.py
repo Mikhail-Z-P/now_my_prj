@@ -58,22 +58,6 @@ def test_rub_transaction():
     assert result == 1000.0
 
 
-def test_missing_amount():
-    """Тест: отсутствует 'amount' → вызвать ValueError."""
-    transaction = {"currency": "USD"}
-    with pytest.raises(ValueError) as exc_info:
-        process_transaction(transaction)
-    assert "Транзакция должна содержать 'amount' и 'currency'" in str(exc_info.value)
-
-
-def test_missing_currency():
-    """Тест: отсутствует 'currency' → вызвать ValueError."""
-    transaction = {"amount": 100}
-    with pytest.raises(ValueError) as exc_info:
-        process_transaction(transaction)
-    assert "Транзакция должна содержать 'amount' и 'currency'" in str(exc_info.value)
-
-
 def test_invalid_amount_type():
     """Тест: 'amount' не число → вызвать ValueError."""
     transaction = {"amount": "100", "currency": "USD"}

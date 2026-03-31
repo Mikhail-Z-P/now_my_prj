@@ -10,12 +10,12 @@ def load_transactions(json_path):
         if not os.path.exists(json_path):
             return []
 
-        with open(json_path, "r", encoding="utf-8") as file:
+        with open("operations.json", "r", encoding="utf-8") as file:
             data = json.load(file)
 
         return data if isinstance(data, list) else []
 
-    except (json.JSONDecodeError, IOError):
+    except (json.JSONDecodeError, FileNotFoundError, IOError):
         return []
 
 
