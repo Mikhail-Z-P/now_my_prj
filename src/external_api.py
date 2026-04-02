@@ -17,14 +17,16 @@ def convert_to_rub(transaction: dict) -> float:
     """
     print(f"API_KEY: {API_KEY}")
     print(f"URL: {API_URL}")
-    amount = transaction["amount"]
-    currency = transaction["currency"].upper()
+
+    amount = float(transaction["operationAmount"]["amount"])
+    currency = transaction["operationAmount"]["currency"]["code"]
 
     if currency == "RUB":
         return float(amount)
 
     if currency not in ["USD", "EUR"]:
         raise ValueError(f"Неподдерживаемая валюта: {currency}")
+
     params = {"from": currency, "to": "RUB", "amount": amount}
     headers = {"apikey": API_KEY}
 

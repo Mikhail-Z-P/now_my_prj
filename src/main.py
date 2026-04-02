@@ -1,10 +1,17 @@
+import json
+import os
+
+from dotenv import load_dotenv
+
 from decorators import log
 from external_api import convert_to_rub
 from generators import card_number_generator, filter_by_currency, transaction_descriptions
 from masks import get_mask_account, get_mask_card_number
 from processing import filter_by_state, sort_by_date
-from utils import load_transactions
 from widget import get_date, mask_account_card
+
+load_dotenv()
+API_KEY = os.environ.get("EXCHANGE_RATES_API_KEY")
 
 if __name__ == "__main__":
     print(get_mask_account("73654108430135874305"))
@@ -103,19 +110,36 @@ if __name__ == "__main__":
         return x + y * d == x % da
 
     fonc(1, 2, 100, 90)
+    if not os.path.exists("C:/Users/persoona_VIP/pythonProject/now.my.prj/data/operations.json"):
+        print("ОШИБКА: Файл operations.json не найден!")
+        exit(1)
 
-    transactions = load_transactions(r"C:\Users\persoona_VIP\pythonProject\now.my.prj\data\operations.json")
-    print(f"Загружено транзакций: {len(transactions)}")
-    print("Содержимое:", transactions)
+        # Диагностика: читаем и проверяем JSON
+    try:
+        with open("C:/Users/persoona_VIP/pythonProject/now.my.prj/data/operations.json", "r", encoding="utf-8") as fil:
+            transactions = json.load(fil)
+        print(f"Успешно загружено {len(transactions)} транзакций")
 
-    transaction_usd = {"amount": 100, "currency": "USD"}
-    result = convert_to_rub(transaction_usd)
-    print(f"100 USD = {result:.2f} руб.")
+    except json.JSONDecodeError as e:
+        print(f"ОШИБКА: Некорректный JSON в файле: {e}")
+        exit(1)
 
-    transaction_eur = {"amount": 50, "currency": "EUR"}
-    result = convert_to_rub(transaction_eur)
-    print(f"50 EUR = {result:.2f} руб.")
+    except Exception as e:
+        print(f"ОШИБКА при чтении файла: {e}")
+        exit(1)
 
-    transaction_rub = {"amount": 1500, "currency": "RUB"}
-    result = convert_to_rub(transaction_rub)
-    print(f"1500 RUB = {result:.2f} руб.")
+        # Диагностика: проверяем API‑ключ
+    if not API_KEY:
+        print("ОШИБКА: API_KEY не найден в .env файле!")
+        print("Убедитесь, что файл .env содержит EXCHANGE_RATES_API_KEY=ваш_ключ")
+        exit(1)
+
+    for transaction in transactions:
+        try:
+            rub_amount = convert_to_rub(transaction)
+            # Используем корректные поля из структуры транзакции
+            amount = transaction["operationAmount"]["amount"]
+            currency_code = transaction["operationAmount"]["currency"]["code"]
+            print(f"Транзакция: {amount} {currency_code} → {rub_amount:.2f} RUB")
+        except (ValueError, ConnectionError, KeyError) as e:
+            print(f"Ошибка для транзакции ID {transaction['id']}: {e}")
