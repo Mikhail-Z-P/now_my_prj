@@ -9,6 +9,7 @@ from generators import card_number_generator, filter_by_currency, transaction_de
 from masks import get_mask_account, get_mask_card_number
 from processing import filter_by_state, sort_by_date
 from widget import get_date, mask_account_card
+from utils import load_transactions, process_transaction
 
 load_dotenv()
 API_KEY = os.environ.get("EXCHANGE_RATES_API_KEY")
@@ -100,14 +101,16 @@ if __name__ == "__main__":
     for card_number in card_number_generator(11, 32):
         print(card_number)
 
+
     @log()
     def fonc(
-        x,
-        y,
-        d,
-        da,
+            x,
+            y,
+            d,
+            da,
     ):
         return x + y * d == x % da
+
 
     fonc(1, 2, 100, 90)
     if not os.path.exists("C:/Users/persoona_VIP/pythonProject/now.my.prj/data/operations.json"):
@@ -137,9 +140,47 @@ if __name__ == "__main__":
     for transaction in transactions:
         try:
             rub_amount = convert_to_rub(transaction)
-            # Используем корректные поля из структуры транзакции
             amount = transaction["operationAmount"]["amount"]
             currency_code = transaction["operationAmount"]["currency"]["code"]
             print(f"Транзакция: {amount} {currency_code} → {rub_amount:.2f} RUB")
         except (ValueError, ConnectionError, KeyError) as e:
             print(f"Ошибка для транзакции ID {transaction['id']}: {e}")
+
+    transactions = [
+        {
+            "id": 441945886,
+            "state": "EXECUTED",
+            "date": "2019-08-26T10:50:58.294041",
+            "operationAmount": {
+                "amount": "31957.58",
+                "currency": {
+                    "name": "руб.",
+                    "code": "RUB"
+                }
+            },
+            "description": "Перевод организации",
+            "from": "Maestro 1596837868705199",
+            "to": "Счет 64686473678894779589"
+        },
+        {
+            "id": 41428829,
+            "state": "EXECUTED",
+            "date": "2019-07-03T18:35:29.512364",
+            "operationAmount": {
+                "amount": "8221.37",
+                "currency": {
+                    "name": "USD",
+                    "code": "USD"
+                }
+            },
+            "description": "Перевод организации",
+            "from": "MasterCard 7158300734726758",
+            "to": "Счет 35383033474447895560"
+        }
+    ]
+
+    transactions = load_transactions("data/transactions.json")
+    transactions = load_transactions("non_existent_file.json")
+    transactions = load_transactions("corrupted_file.txt")
+
+    result = process_transaction(transactions)
