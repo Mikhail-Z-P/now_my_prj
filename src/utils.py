@@ -1,22 +1,23 @@
 import json
-import os
 import logging
+import os
 
 from src.external_api import convert_to_rub
 
-root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-logs_dir = os.path.join(root_dir, 'logs')
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+logs_dir = os.path.join(root_dir, "logs")
 
 if not os.path.exists(logs_dir):
     os.makedirs(logs_dir)
 
 utils_logger = logging.getLogger(__name__)
-file_handler = logging.FileHandler('../logs/utils.log', encoding="utf-8")
-file_formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s: %(message)s')
+file_handler = logging.FileHandler("../logs/utils.log", mode="w", encoding="utf-8")
+file_formatter = logging.Formatter("%(asctime)s %(name)s %(levelname)s: %(message)s")
 file_handler.setFormatter(file_formatter)
 
 utils_logger.addHandler(file_handler)
-utils_logger.setLevel(logging.INFO)
+utils_logger.setLevel(logging.DEBUG)
+
 
 def load_transactions(json_path):
     """Загружает список словарей с транзакциями из JSON-файла."""
@@ -32,8 +33,8 @@ def load_transactions(json_path):
         utils_logger.error(f"Данные загружены, проверка типа: {isinstance(data, list)}")
         return data if isinstance(data, list) else []
 
-    except (json.JSONDecodeError, FileNotFoundError, IOError):
-        utils_logger.error(f"Произошла ошибка при загрузке файла {json_path}")
+    except (json.JSONDecodeError, FileNotFoundError, IOError) as e:
+        utils_logger.error(f"Произошла ошибка при загрузке файла {json_path}: {str(e)}")
         return []
 
 

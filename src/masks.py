@@ -1,19 +1,19 @@
-import re
 import logging
 import os
+import re
 
-root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-logs_dir = os.path.join(root_dir, 'logs')
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+logs_dir = os.path.join(root_dir, "logs")
 
 if not os.path.exists(logs_dir):
     os.makedirs(logs_dir)
 
 masks_logger = logging.getLogger(__name__)
-file_handler = logging.FileHandler('../logs/masks.log', encoding="utf-8")
-file_formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s: %(message)s')
+file_handler = logging.FileHandler("../logs/masks.log", mode="w", encoding="utf-8")
+file_formatter = logging.Formatter("%(asctime)s %(name)s %(levelname)s: %(message)s")
 file_handler.setFormatter(file_formatter)
 masks_logger.addHandler(file_handler)
-masks_logger.setLevel(logging.INFO)
+masks_logger.setLevel(logging.DEBUG)
 
 
 def get_mask_card_number(bank_card: str) -> str:
@@ -37,7 +37,7 @@ def get_mask_card_number(bank_card: str) -> str:
         if count_four % 4 == 0 and account != len(digits):
             card_number += " "
     if account != 16:
-        masks_logger.warning(f"Длина номера не равна 16 цифрам: {account}. Возвращаем пустую строку.")
+        masks_logger.error(f"Длина номера не равна 16 цифрам: {account}. Возвращаем пустую строку.")
         return ""
     else:
         masks_logger.info(f"Обработка завершена успешно. Замаскированный номер: {card_number}")
