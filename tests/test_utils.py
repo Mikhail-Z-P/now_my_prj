@@ -51,31 +51,67 @@ def test_json_decode_error():
         assert result == []
 
 
-def test_rub_transaction():
-    """Тест: транзакция в RUB → вернуть сумму без изменений."""
+def test_process_transaction_rub_success():
+    """Тест: транзакция в RUB → вернуть сумму без изменений (успех)."""
+    with patch("src.utils.convert_to_rub") as mock_convert:
+        mock_convert.return_value = 1000.0
+
+        transaction = {"operationAmount": {"amount": 1000, "currency": {"code": "RUB"}}}
+
+        result = process_transaction(transaction)
+
+        assert result == 1000.0
+        mock_convert.assert_called_once_with({"amount": 1000, "currency": "RUB"})
+
+
+def test_process_transaction_usd_success():
+    """Тест: транзакция в USD → вызов конвертации (успех)."""
+    with patch("src.utils.convert_to_rub") as mock_convert:
+        mock_convert.return_value = 95000.0  # 100 USD ≈ 95 000 RUB
+
+        transaction = {"operationAmount": {"amount": 100, "currency": {"code": "USD"}}}
+
+        result = process_transaction(transaction)
+
+        assert result == 95000.0
+        mock_convert.assert_called_once_with({"amount": 100, "currency": "USD"})
+
+
+def test_missing_operation_amount():
+    """Тест: отсутствует 'operationAmount' → ValueError."""
     transaction = {"amount": 1000, "currency": "RUB"}
-    result = process_transaction(transaction)
-    assert result == 1000.0
 
-
-def test_invalid_amount_type():
-    """Тест: 'amount' не число → вызвать ValueError."""
-    transaction = {"amount": "100", "currency": "USD"}
     with pytest.raises(ValueError) as exc_info:
         process_transaction(transaction)
-    assert "Сумма должна быть числом" in str(exc_info.value)
+
+    assert "Транзакция должна содержать поле 'operationAmount'" in str(exc_info.value)
 
 
-def test_unsupported_currency():
-    """Тест: неподдерживаемая валюта → вызвать ValueError."""
-    transaction = {"amount": 100, "currency": "GBP"}
+def test_missing_amount_in_operation_amount():
+    """Тест: отсутствует 'amount' в 'operationAmount' → ValueError."""
+    transaction = {"operationAmount": {"currency": {"code": "RUB"}}}
+
     with pytest.raises(ValueError) as exc_info:
         process_transaction(transaction)
-    assert "Неподдерживаемая валюта" in str(exc_info.value)
+
+    assert "Транзакция должна содержать поле 'amount' в operationAmount" in str(exc_info.value)
 
 
-def test_negative_amount():
-    """Тест: отрицательная сумма → обработать корректно."""
-    transaction = {"amount": -50, "currency": "RUB"}
-    result = process_transaction(transaction)
-    assert result == -50.0
+def test_missing_currency_in_operation_amount():
+    """Тест: отсутствует 'currency' в 'operationAmount' → ValueError."""
+    transaction = {"operationAmount": {"amount": 1000}}
+
+    with pytest.raises(ValueError) as exc_info:
+        process_transaction(transaction)
+
+    assert "Транзакция должна содержать поле 'currency' в operationAmount" in str(exc_info.value)
+
+
+def test_missing_code_in_currency():
+    """Тест: отсутствует 'code' в 'currency' → ValueError."""
+    transaction = {"operationAmount": {"amount": 1000, "currency": {}}}
+
+    with pytest.raises(ValueError) as exc_info:
+        process_transaction(transaction)
+
+    assert "Поле 'currency' должно содержать ключ 'code'" in str(exc_info.value)

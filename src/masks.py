@@ -4,12 +4,13 @@ import re
 
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 logs_dir = os.path.join(root_dir, "logs")
+log_file_path = os.path.join(logs_dir, "masks.log")
 
 if not os.path.exists(logs_dir):
     os.makedirs(logs_dir)
 
 masks_logger = logging.getLogger(__name__)
-file_handler = logging.FileHandler("../logs/masks.log", mode="w", encoding="utf-8")
+file_handler = logging.FileHandler(log_file_path, mode="w", encoding="utf-8")
 file_formatter = logging.Formatter("%(asctime)s %(name)s %(levelname)s: %(message)s")
 file_handler.setFormatter(file_formatter)
 masks_logger.addHandler(file_handler)

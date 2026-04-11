@@ -1,4 +1,14 @@
+import logging
+
 import pytest
+
+
+@pytest.fixture(autouse=True)
+def disable_logging():
+    """Отключает логирование во время тестов"""
+    logging.disable(logging.CRITICAL)
+    yield
+    logging.disable(logging.NOTSET)
 
 
 @pytest.fixture
