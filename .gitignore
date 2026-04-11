@@ -210,4 +210,3 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-/of_tasks_utils/
