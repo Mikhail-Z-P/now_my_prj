@@ -1,4 +1,5 @@
 import re
+from collections import Counter
 
 def process_bank_search(datas:list[dict], search:str)->list[dict]:
     """Принимает список словарей, возвращает отфильтрованный список, где есть строка search"""
@@ -11,6 +12,17 @@ def process_bank_search(datas:list[dict], search:str)->list[dict]:
 
 
 def process_bank_operations(datas:list[dict], categories:list)->dict:
+    """Принимает список словарей, и список категорий, возвращяет """
+    counter = Counter({category: 0 for category in categories})
+
+    for operation in datas:
+        description = operation.get("description", "").lower()
+
+        for category in categories:
+            if category.lower() in description:
+                counter[category] += 1
+
+    return dict(counter)
 
 
 
@@ -39,14 +51,3 @@ def process_bank_operations(datas:list[dict], categories:list)->dict:
 
 
 
-
-
-
-datas = [
-    {"name": "Sberbank", "city": "Moscow", "rating": 4.8},
-    {"name": "VTB Bank", "city": "Saint Petersburg", "rating": 4.5},
-    {"name": "Alfa-Bank", "city": "Moscow", "rating": 4.7},
-    {"name": "Tinkoff", "city": "Online", "rating": 4.9}
-]
-filter_lists = process_bank_search(data, "bank")
-print(filter_lists)
