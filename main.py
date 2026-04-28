@@ -2,7 +2,8 @@ import json
 import csv
 import pandas as pd
 from regular_expressions import process_bank_search
-from processing import sort_by_date
+from processing import sort_by_date, filter_by_state
+from utils import process_transaction
 
 def start_processing(*args, **kwargs):
     print("Привет! Добро пожаловать в программу работы с банковскими транзакциями")
@@ -51,15 +52,13 @@ def start_processing(*args, **kwargs):
 Введите статус, по которому необходимо выполнить фильтрацию
 Доступные для фильтровки статусы: EXECUTED, CANCELED, PENDING
 """)
-
     while True:
         number = input("Введите статус: ").upper().strip()
         filtered_data = None
 
         valid_statuses = {"EXECUTED", "CANCELED", "PENDING"}
         if number in valid_statuses:
-            status_pattern = fr'\b{number}\b'
-            filtered_data = process_bank_search(data, status_pattern)
+            filtered_data = filter_by_state(data, number)
 
             if number == "EXECUTED":
                 print('Операции отфильтрованы по статусу "EXECUTED"')
@@ -82,7 +81,7 @@ def start_processing(*args, **kwargs):
                 print('Выбор да')
                 filtered_data = sort_by_date(filtered_data)
             elif number == "нет":
-                print('Выбор нет"')
+                print('Выбор нет')
             break
         else:
             print("Ошибка! Введите да/нет")
@@ -98,21 +97,30 @@ def start_processing(*args, **kwargs):
                 print('Выбор по возрастанию')
             elif number == "по убыванию":
                 print('Выбор по убыванию')
+                filtered_data = sort_by_date(filtered_data, sorting=False)
             break
         else:
             print("Ошибка!")
 
     print("Выводить только рублевые транзакции? Да/Нет")
+    results = []
     while True:
         number = input("Введите Да/Нет: ").lower().strip()
-
         statuses = {"да", "нет"}
 
         if number in statuses:
             if number == "да":
                 print('Выбор да')
+                for transaction  in filtered_data:
+                    try:
+                        rub_amount = process_transaction(transaction)
+                        results.append(rub_amount)
+                    except ValueError as e:
+                        print(f"Ошибка обработки транзакции: {e}")
+                        results.append(None)
             elif number == "нет":
-                print('Выбор нет"')
+                print('Выбор нет')
+                results = filtered_data.copy()
             break
         else:
             print("Ошибка! Введите да/нет")
@@ -126,12 +134,17 @@ def start_processing(*args, **kwargs):
         if number in statuses:
             if number == "да":
                 print('Выбор да')
+                numbers = input("Введите слово: ")
+                name_pattern = fr'\b{numbers}\b'
+                results = process_bank_search(results, name_pattern)
             elif number == "нет":
                 print('Выбор нет"')
             break
         else:
             print("Ошибка! Введите да/нет")
+
     print("Распечатываю итоговый список транзакций...")
+    return print(results)
 
 
 
