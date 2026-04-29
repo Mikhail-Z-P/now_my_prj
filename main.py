@@ -1,175 +1,207 @@
-# import json
-import os
+import csv
+import pandas as pd
+import json
 
 from dotenv import load_dotenv
 from tables_pandas import reading_csv
-# from decorators import log
-# from external_api import convert_to_rub
-# from generators import card_number_generator, filter_by_currency, transaction_descriptions
-# from masks import get_mask_account, get_mask_card_number
-# from processing import filter_by_state, sort_by_date
-# from utils import load_transactions, process_transaction
-# from widget import get_date, mask_account_card
-
+from src.decorators import log
+from src.external_api import convert_to_rub
+from src.generators import card_number_generator, filter_by_currency, transaction_descriptions
+from src.masks import get_mask_account, get_mask_card_number
+from src.processing import filter_by_state, sort_by_date
+from src.utils import load_transactions, process_transaction
+from src.widget import get_date, mask_account_card
+from regular_expressions import process_bank_search, process_bank_operations
 load_dotenv()
-API_KEY = os.environ.get("EXCHANGE_RATES_API_KEY")
+
+
+def start_processing():
+    """Основная функция для обработки банковских транзакций."""
+
+    print("Привет! Добро пожаловать в программу работы с банковскими транзакциями")
+    print("Выберите необходимый пункт меню:")
+    print("""
+1. Получить информацию о транзакциях из JSON-файла
+2. Получить информацию о транзакциях из CSV-файла
+3. Получить информацию о транзакциях из XLSX-файла
+""")
+
+    while True:
+        number = input("Введите число: ").strip()
+
+        valid_number = {"1", "2", "3"}
+
+        if number in valid_number:
+            file_path = ""
+            data = None
+            try:
+                if number == "1":
+                    print("Для обработки выбран JSON-файл.")
+                    file_path = input("Введите путь к JSON-файлу: ").strip()
+                    with open(file_path, 'r', encoding='utf-8') as file:
+                        data = json.load(file)
+
+                elif number == "2":
+                    print("Для обработки выбран CSV-файл.")
+                    file_path = input("Введите путь к CSV-файл: ").strip()
+                    with open(file_path, 'r', encoding='utf-8') as file:
+                        first_line = file.readline()
+
+                        if ';' in first_line:
+                            delimiter = ';'
+                        elif ',' in first_line:
+                            delimiter = ','
+                        else:
+                            print("Ошибка: Неподдерживаемый формат CSV файла")
+                            continue
+                        file.seek(0)
+                        reader = csv.DictReader(file, delimiter=delimiter)
+                        data = list(reader)
+
+                elif number == "3":
+                    print("Для обработки выбран XLSX-файл.")
+                    file_path = input("Введите путь к XLSX-файл: ").strip()
+                    data = pd.read_excel(file_path).to_dict(orient='records')
+                break
+            except FileNotFoundError:
+                print(f"Ошибка: Файл {file_path} не найден")
+
+            except Exception as e:
+                print(f"Произошла ошибка при чтении файла: {str(e)}")
+        else:
+            print("Ошибка! Выберите число из приведенных выше")
+    print("""
+Введите статус, по которому необходимо выполнить фильтрацию
+Доступные для фильтровки статусы: EXECUTED, CANCELED, PENDING
+""")
+    while True:
+        number = input("Введите статус: ").upper().strip()
+        filtered_data = None
+
+        valid_statuses = {"EXECUTED", "CANCELED", "PENDING"}
+        if number in valid_statuses:
+            filtered_data = filter_by_state(data, number)
+
+            if number == "EXECUTED":
+                print('Операции отфильтрованы по статусу "EXECUTED"')
+            elif number == "CANCELED":
+                print('Операции отфильтрованы по статусу "CANCELED"')
+            elif number == "PENDING":
+                print('Операции отфильтрованы по статусу "PENDING"')
+            break
+        else:
+            print("Ошибка! Введите статус из приведенных выше")
+
+    print("Отсортировать операции по дате? Да/Нет")
+    while True:
+        number = input("Введите да/нет: ").lower().strip()
+
+        statuses = {"да", "нет"}
+
+        if number in statuses:
+            if number == "да":
+                print('Выбор да')
+                filtered_data = sort_by_date(filtered_data)
+            elif number == "нет":
+                print('Выбор нет')
+            break
+        else:
+            print("Ошибка! Введите да/нет")
+
+    print("Отсортировать по возрастанию или по убыванию?")
+    while True:
+        number = input("Введите по возрастанию/по убыванию: ").lower().strip()
+
+        statuses = {"по возрастанию", "по убыванию"}
+
+        if number in statuses:
+            if number == "по возрастанию":
+                print('Выбор по возрастанию')
+            elif number == "по убыванию":
+                print('Выбор по убыванию')
+                filtered_data = sort_by_date(filtered_data, sorting=False)
+            break
+        else:
+            print("Ошибка!")
+
+    print("Выводить только рублевые транзакции? Да/Нет")
+    results = []
+    while True:
+        number = input("Введите Да/Нет: ").lower().strip()
+        statuses = {"да", "нет"}
+
+        if number in statuses:
+            if number == "да":
+                print('Выбор да')
+                for transaction in filtered_data:
+                    try:
+                        rub_amount = process_transaction(transaction)
+                        results.append(rub_amount)
+                    except ValueError as e:
+                        print(f"Ошибка обработки транзакции: {e}")
+                        results.append(None)
+            elif number == "нет":
+                print('Выбор нет')
+                results = filtered_data.copy()
+            break
+        else:
+            print("Ошибка! Введите да/нет")
+
+    print("Отфильтровать список транзакций по определенному слову в описании? Да/Нет")
+    while True:
+        number = input("Введите Да/Нет: ").lower().strip()
+
+        statuses = {"да", "нет"}
+
+        if number in statuses:
+            if number == "да":
+                print('Выбор да')
+                numbers = input("Введите слово: ")
+                name_pattern = fr'\b{numbers}\b'
+                results = process_bank_search(results, name_pattern)
+            elif number == "нет":
+                print('Выбор нет"')
+            break
+        else:
+            print("Ошибка! Введите да/нет")
+
+    print("Распечатываю итоговый список транзакций...")
+    if not results:
+        return print("Не найдено ни одной транзакции, подходящей под ваши условия фильтрации")
+    else:
+        print(f"Всего банковских операций в выборке: {len(results)}\n")
+        for transaction in results:
+            try:
+                formatted_date = get_date(transaction.get('date', 'N/A'))
+
+                print(f"{formatted_date} {transaction.get('description', 'N/A')}")
+
+                from_card = transaction.get('from', '')
+                to_card = transaction.get('to', '')
+
+                if from_card and to_card:
+                    masked_from = get_mask_card_number(from_card)
+                    masked_to = get_mask_card_number(to_card)
+                    print(f"{masked_from} -> {masked_to}")
+
+                amount = transaction.get('amount', 'N/A')
+                currency = transaction.get('currency_name', transaction.get('currency_code', 'N/A'))
+
+                if currency == 'RUB':
+                    print(f"Сумма: {amount} руб.")
+                else:
+                    print(f"Сумма: {amount} {currency}")
+                print()
+
+            except Exception as e:
+                print(f"Ошибка при выводе транзакции: {str(e)}")
+                print()
+
+
+
 
 if __name__ == "__main__":
-    # print(get_mask_account("73654108430135874305"))
-    # print(get_mask_card_number("7000792289606361"))
-    #
-    # print(mask_account_card("Visa Platinum 7000792289606361"))
-    # print(mask_account_card("Счет 73654108430135874305"))
-    #
-    # print(get_date("2024-03-11T02:26:18.671407"))  # Вывод: 11.03.2024
-    # print(
-    #     filter_by_state(
-    #         [
-    #             {"id": 41428829, "state": "EXECUTED", "date": "2019-07-03T18:35:29.512364"},
-    #             {"id": 939719570, "state": "EXECUTED", "date": "2018-06-30T02:08:58.425572"},
-    #             {"id": 594226727, "state": "CANCELED", "date": "2018-09-12T21:27:25.241689"},
-    #             {"id": 615064591, "state": "CANCELED", "date": "2018-10-14T08:21:33.419441"},
-    #         ]
-    #     )
-    # )
-    # print(
-    #     sort_by_date(
-    #         [
-    #             {"id": 41428829, "state": "EXECUTED", "date": "2019-07-03T18:35:29.512364"},
-    #             {"id": 615064591, "state": "CANCELED", "date": "2018-10-14T08:21:33.419441"},
-    #             {"id": 594226727, "state": "CANCELED", "date": "2018-09-12T21:27:25.241689"},
-    #             {"id": 939719570, "state": "EXECUTED", "date": "2018-06-30T02:08:58.425572"},
-    #         ]
-    #     )
-    # )
-    # transactions = [
-    #     {
-    #         "id": 939719570,
-    #         "state": "EXECUTED",
-    #         "date": "2018-06-30T02:08:58.425572",
-    #         "operationAmount": {"amount": "9824.07", "currency": {"name": "USD", "code": "USD"}},
-    #         "description": "Перевод организации",
-    #         "from": "Счет 75106830613657916952",
-    #         "to": "Счет 11776614605963066702",
-    #     },
-    #     {
-    #         "id": 142264268,
-    #         "state": "EXECUTED",
-    #         "date": "2019-04-04T23:20:05.206878",
-    #         "operationAmount": {"amount": "79114.93", "currency": {"name": "USD", "code": "USD"}},
-    #         "description": "Перевод со счета на счет",
-    #         "from": "Счет 19708645243227258542",
-    #         "to": "Счет 75651667383060284188",
-    #     },
-    #     {
-    #         "id": 873106923,
-    #         "state": "EXECUTED",
-    #         "date": "2019-03-23T01:09:46.296404",
-    #         "operationAmount": {"amount": "43318.34", "currency": {"name": "руб.", "code": "RUB"}},
-    #         "description": "Перевод со счета на счет",
-    #         "from": "Счет 44812258784861134719",
-    #         "to": "Счет 74489636417521191160",
-    #     },
-    #     {
-    #         "id": 895315941,
-    #         "state": "EXECUTED",
-    #         "date": "2018-08-19T04:27:37.904916",
-    #         "operationAmount": {"amount": "56883.54", "currency": {"name": "USD", "code": "USD"}},
-    #         "description": "Перевод с карты на карту",
-    #         "from": "Visa Classic 6831982476737658",
-    #         "to": "Visa Platinum 8990922113665229",
-    #     },
-    #     {
-    #         "id": 594226727,
-    #         "state": "CANCELED",
-    #         "date": "2018-09-12T21:27:25.241689",
-    #         "operationAmount": {"amount": "67314.70", "currency": {"name": "руб.", "code": "RUB"}},
-    #         "description": "Перевод организации",
-    #         "from": "Visa Platinum 1246377376343588",
-    #         "to": "Счет 14211924144426031657",
-    #     },
-    # ]
-    #
-    # usd_transactions = filter_by_currency(transactions, "USD")
-    # for _ in range(2):
-    #     print(next(usd_transactions))
-    #
-    # descriptions = transaction_descriptions(transactions)
-    # for _ in range(2):
-    #     print(next(descriptions))
-    #
-    # for card_number in card_number_generator(11, 32):
-    #     print(card_number)
-    #
-    # @log()
-    # def fonc(
-    #     x,
-    #     y,
-    #     d,
-    #     da,
-    # ):
-    #     return x + y * d == x % da
-
-    # fonc(1, 2, 100, 90)
-    # if not os.path.exists("C:/Users/persoona_VIP/pythonProject/now.my.prj/data/operations.json"):
-    #     print("ОШИБКА: Файл operations.json не найден!")
-    #     exit(1)
-    #
-    #     # Диагностика: читаем и проверяем JSON
-    # try:
-    #     with open("C:/Users/persoona_VIP/pythonProject/now.my.prj/data/operations.json", "r", encoding="utf-8") as fil:
-    #         transactions = json.load(fil)
-    #     print(f"Успешно загружено {len(transactions)} транзакций")
-    #
-    # except json.JSONDecodeError as e:
-    #     print(f"ОШИБКА: Некорректный JSON в файле: {e}")
-    #     exit(1)
-    #
-    # except Exception as e:
-    #     print(f"ОШИБКА при чтении файла: {e}")
-    #     exit(1)
-    #
-    #     # Диагностика: проверяем API‑ключ
-    # if not API_KEY:
-    #     print("ОШИБКА: API_KEY не найден в .env файле!")
-    #     print("Убедитесь, что файл .env содержит EXCHANGE_RATES_API_KEY=ваш_ключ")
-    #     exit(1)
-    #
-    # for transaction in transactions:
-    #     try:
-    #         rub_amount = convert_to_rub(transaction)
-    #         amount = transaction["operationAmount"]["amount"]
-    #         currency_code = transaction["operationAmount"]["currency"]["code"]
-    #         print(f"Транзакция: {amount} {currency_code} → {rub_amount:.2f} RUB")
-    #     except (ValueError, ConnectionError, KeyError) as e:
-    #         print(f"Ошибка для транзакции ID {transaction['id']}: {e}")
-
-    # transactions = [
-    #     {
-    #         "id": 441945886,
-    #         "state": "EXECUTED",
-    #         "date": "2019-08-26T10:50:58.294041",
-    #         "operationAmount": {"amount": "31957.58", "currency": {"name": "руб.", "code": "RUB"}},
-    #         "description": "Перевод организации",
-    #         "from": "Maestro 1596837868705199",
-    #         "to": "Счет 64686473678894779589",
-    #     },
-    #     {
-    #         "id": 41428829,
-    #         "state": "EXECUTED",
-    #         "date": "2019-07-03T18:35:29.512364",
-    #         "operationAmount": {"amount": "8221.37", "currency": {"name": "USD", "code": "USD"}},
-    #         "description": "Перевод организации",
-    #         "from": "MasterCard 7158300734726758",
-    #         "to": "Счет 35383033474447895560",
-    #     },
-    # ]
-    #
-    # transactions = load_transactions("data/transactions.json")
-    # transactions = load_transactions("non_existent_file.json")
-    # transactions = load_transactions("corrupted_file.txt")
-    #
-    # result = process_transaction(transactions)
-
-    transactions = reading_csv("data/transactions.csv")
-    print(transactions[:10])
+    start_processing()
+    trn = [{'id': '3235160', 'state': 'EXECUTED', 'date': '2023-11-12T16:17:52Z', 'amount': '34316',
+            'currency_name': 'Euro', 'currency_code': 'EUR', 'from': 'Visa 2336865385909932',
+            'to': 'American Express 2266395591845773', 'description': 'Перевод с карты на карту'}]
