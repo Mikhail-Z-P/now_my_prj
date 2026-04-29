@@ -144,7 +144,10 @@ def start_processing(*args, **kwargs):
             print("Ошибка! Введите да/нет")
 
     print("Распечатываю итоговый список транзакций...")
-    return print(results)
+    if results == []:
+        return print("Не найдено ни одной транзакции, подходящей под ваши условия фильтрации")
+    else:
+        return print(results)
 
 
 
