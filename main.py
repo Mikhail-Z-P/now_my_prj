@@ -1,11 +1,23 @@
-import json
 import csv
 import pandas as pd
-from regular_expressions import process_bank_search
-from processing import sort_by_date, filter_by_state
-from utils import process_transaction
+import json
 
-def start_processing(*args, **kwargs):
+from dotenv import load_dotenv
+from tables_pandas import reading_csv
+from src.decorators import log
+from src.external_api import convert_to_rub
+from src.generators import card_number_generator, filter_by_currency, transaction_descriptions
+from src.masks import get_mask_account, get_mask_card_number
+from src.processing import filter_by_state, sort_by_date
+from src.utils import load_transactions, process_transaction
+from src.widget import get_date, mask_account_card
+from regular_expressions import process_bank_search, process_bank_operations
+load_dotenv()
+
+
+def start_processing():
+    """Основная функция для обработки банковских транзакций."""
+
     print("Привет! Добро пожаловать в программу работы с банковскими транзакциями")
     print("Выберите необходимый пункт меню:")
     print("""
@@ -33,7 +45,17 @@ def start_processing(*args, **kwargs):
                     print("Для обработки выбран CSV-файл.")
                     file_path = input("Введите путь к CSV-файл: ").strip()
                     with open(file_path, 'r', encoding='utf-8') as file:
-                        reader = csv.DictReader(file)
+                        first_line = file.readline()
+
+                        if ';' in first_line:
+                            delimiter = ';'
+                        elif ',' in first_line:
+                            delimiter = ','
+                        else:
+                            print("Ошибка: Неподдерживаемый формат CSV файла")
+                            continue
+                        file.seek(0)
+                        reader = csv.DictReader(file, delimiter=delimiter)
                         data = list(reader)
 
                 elif number == "3":
@@ -111,7 +133,7 @@ def start_processing(*args, **kwargs):
         if number in statuses:
             if number == "да":
                 print('Выбор да')
-                for transaction  in filtered_data:
+                for transaction in filtered_data:
                     try:
                         rub_amount = process_transaction(transaction)
                         results.append(rub_amount)
@@ -144,14 +166,42 @@ def start_processing(*args, **kwargs):
             print("Ошибка! Введите да/нет")
 
     print("Распечатываю итоговый список транзакций...")
-    if results == []:
+    if not results:
         return print("Не найдено ни одной транзакции, подходящей под ваши условия фильтрации")
     else:
-        return print(results)
+        print(f"Всего банковских операций в выборке: {len(results)}\n")
+        for transaction in results:
+            try:
+                formatted_date = get_date(transaction.get('date', 'N/A'))
 
+                print(f"{formatted_date} {transaction.get('description', 'N/A')}")
+
+                from_card = transaction.get('from', '')
+                to_card = transaction.get('to', '')
+
+                if from_card and to_card:
+                    masked_from = get_mask_card_number(from_card)
+                    masked_to = get_mask_card_number(to_card)
+                    print(f"{masked_from} -> {masked_to}")
+
+                amount = transaction.get('amount', 'N/A')
+                currency = transaction.get('currency_name', transaction.get('currency_code', 'N/A'))
+
+                if currency == 'RUB':
+                    print(f"Сумма: {amount} руб.")
+                else:
+                    print(f"Сумма: {amount} {currency}")
+                print()
+
+            except Exception as e:
+                print(f"Ошибка при выводе транзакции: {str(e)}")
+                print()
 
 
 
 
 if __name__ == "__main__":
-    print(start_processing())
+    start_processing()
+    trn = [{'id': '3235160', 'state': 'EXECUTED', 'date': '2023-11-12T16:17:52Z', 'amount': '34316',
+            'currency_name': 'Euro', 'currency_code': 'EUR', 'from': 'Visa 2336865385909932',
+            'to': 'American Express 2266395591845773', 'description': 'Перевод с карты на карту'}]
